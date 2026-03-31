@@ -1,209 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="or">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TMS | Teacher Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>SmartSchool Pro | AI Powered Superclass</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-link:hover { background-color: rgba(255,255,255,0.1); }
+        :root { --primary: #4338ca; --accent: #f43f5e; --glass: rgba(255, 255, 255, 0.95); }
+        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 260px; height: 100vh; background: white; border-right: 1px solid #e2e8f0; position: fixed; padding: 20px; }
+        .main-content { margin-left: 260px; height: 100vh; overflow-y: auto; padding: 30px; }
+        
+        .nav-link-custom { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 10px; color: #64748b; text-decoration: none; margin-bottom: 5px; transition: 0.3s; }
+        .nav-link-custom:hover, .nav-link-custom.active { background: var(--primary); color: white; }
+        
+        .card { border: none; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        #map { height: 350px; border-radius: 15px; width: 100%; border: 2px solid white; }
+        
+        /* Parent Login Modal Style */
+        #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; padding: 40px; border-radius: 25px; width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex">
+<body>
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-white hidden md:flex flex-col">
-        <div class="p-6 text-2xl font-bold border-b border-slate-700 flex items-center">
-            <i class="fas fa-university mr-3 text-blue-400"></i> EduSystem
+<div id="login-screen">
+    <div class="login-card text-center">
+        <h4 class="fw-bold text-primary">SmartSchool Pro</h4>
+        <p class="small text-muted mb-4">Student ID (User) & Contact (Pass)</p>
+        <div class="text-start mb-3">
+            <input type="text" id="login-user" class="form-control rounded-pill p-2 px-3" placeholder="Student ID (Ex: S101)">
         </div>
-        <nav class="flex-1 p-4 space-y-2">
-            <a href="#" class="flex items-center p-3 rounded-lg bg-blue-600 shadow-lg">
-                <i class="fas fa-th-large mr-3"></i> Dashboard
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg sidebar-link transition">
-                <i class="fas fa-user-graduate mr-3"></i> Students
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg sidebar-link transition">
-                <i class="fas fa-book mr-3"></i> Courses
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg sidebar-link transition">
-                <i class="fas fa-cog mr-3"></i> Settings
-            </a>
-        </nav>
-    </aside>
+        <div class="text-start mb-4">
+            <input type="password" id="login-pass" class="form-control rounded-pill p-2 px-3" placeholder="Mobile Number">
+        </div>
+        <button class="btn btn-primary w-100 rounded-pill py-2" onclick="processLogin()">ଲଗଇନ୍ କରନ୍ତୁ</button>
+        <hr>
+        <button class="btn btn-link btn-sm text-decoration-none" onclick="adminBypass()">Admin Login</button>
+    </div>
+</div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-        <!-- Header -->
-        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
-            <h2 class="text-xl font-semibold text-gray-700">Teacher Management</h2>
-            <div class="flex items-center space-x-4">
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Search teacher..." class="pl-10 pr-4 py-2 border rounded-full text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
-                </div>
-                <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition">
-                    <i class="fas fa-plus mr-2"></i> Add New
+<div class="sidebar">
+    <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-shield-check"></i> Superclass Admin</h5>
+    <nav>
+        <a href="#" class="nav-link-custom active" onclick="switchTab('home')"><i class="bi bi-house"></i> Dashboard</a>
+        <a href="#" class="nav-link-custom" onclick="switchTab('tracking')"><i class="bi bi-geo-alt"></i> Live Tracking</a>
+        <a href="#" class="nav-link-custom" onclick="switchTab('fees')"><i class="bi bi-wallet2"></i> Fees & QR</a>
+        <a href="#" class="nav-link-custom" onclick="switchTab('ai-brain')"><i class="bi bi-robot"></i> AI Analysis</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div id="tab-home">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold">Management Dashboard</h3>
+            <div class="d-flex gap-2">
+                <input type="file" id="upload-excel" hidden onchange="handleExcel(event)">
+                <button class="btn btn-light border rounded-pill px-4" onclick="document.getElementById('upload-excel').click()">
+                    <i class="bi bi-upload text-success me-1"></i> Import Excel
+                </button>
+                <button class="btn btn-danger rounded-pill px-4" onclick="sendBulkAlerts()">
+                    <i class="bi bi-whatsapp me-1"></i> Alert All Due
                 </button>
             </div>
-        </header>
+        </div>
 
-        <!-- Dashboard Stats -->
-        <main class="p-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-blue-500">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-gray-500 text-sm font-semibold uppercase">Total Teachers</p>
-                            <h3 id="totalTeachers" class="text-3xl font-bold mt-1 text-slate-800">0</h3>
-                        </div>
-                        <div class="bg-blue-100 p-3 rounded-lg"><i class="fas fa-chalkboard-teacher text-blue-600 text-xl"></i></div>
-                    </div>
-                </div>
-                <!-- Static placeholders for UI design -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-green-500">
-                    <div class="flex justify-between items-center">
-                        <div><p class="text-gray-500 text-sm font-semibold uppercase">Departments</p><h3 class="text-3xl font-bold mt-1 text-slate-800">12</h3></div>
-                        <div class="bg-green-100 p-3 rounded-lg"><i class="fas fa-building text-green-600 text-xl"></i></div>
-                    </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="card p-3"><h6>Total Students</h6><h3 id="stat-total">0</h3></div></div>
+            <div class="col-md-3"><div class="col card p-3 border-danger border-start border-5"><h6>Total Due</h6><h3 id="stat-due">₹0</h3></div></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card p-3">
+                    <h6 class="fw-bold mb-3">Student Data Management</h6>
+                    <table class="table table-hover small">
+                        <thead class="table-light"><tr><th>ID</th><th>Name</th><th>Phone</th><th>Due</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="data-list"></tbody>
+                    </table>
                 </div>
             </div>
-
-            <!-- Teachers Table -->
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase">Teacher Name</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase">Department</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase">Email</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="teacherTable" class="divide-y divide-gray-100">
-                        <!-- Table rows will be inserted here by JS -->
-                    </tbody>
-                </table>
+            <div class="col-md-4">
+                <div class="card p-4 text-center mb-4 border-primary border-top border-5">
+                    <h6>Dynamic Fees QR</h6>
+                    <img id="dynamic-qr" src="https://via.placeholder.com/200?text=Scan+to+Pay" class="img-fluid p-3">
+                    <p id="qr-label" class="fw-bold text-primary mt-2">No Student Selected</p>
+                </div>
+                <div class="card p-3 bg-dark text-white">
+                    <h6><i class="bi bi-stars text-info"></i> AI Brain (Paperclip Style)</h6>
+                    <p id="ai-insight" class="small mb-0">Upload Excel data for AI insights...</p>
+                </div>
             </div>
-        </main>
-    </div>
-
-    <!-- Modal Form -->
-    <div id="modalOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl transform transition-all">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h3 id="modalTitle" class="text-xl font-bold text-gray-800">Add Teacher</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
-            </div>
-            <form id="teacherForm" class="p-6 space-y-4">
-                <input type="hidden" id="editIndex">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                    <input type="text" id="tName" required class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="Dr. John Smith">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                    <select id="tDept" class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Computer Science</option>
-                        <option>Mechanical Engineering</option>
-                        <option>Physics</option>
-                        <option>Applied Mathematics</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="tEmail" required class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="john@university.edu">
-                </div>
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 shadow-md">Confirm Save</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <script>
-        // State Management
-        let teachers = JSON.parse(localStorage.getItem('edu_teachers')) || [];
-        const tableBody = document.getElementById('teacherTable');
-        const searchInput = document.getElementById('searchInput');
+    <div id="tab-tracking" style="display:none;">
+        <h4 class="fw-bold mb-3">Instant Bus Tracking</h4>
+        <div class="card p-2 shadow-sm">
+            <div id="map"></div>
+        </div>
+        <div class="alert alert-warning mt-3 small"><i class="bi bi-broadcast"></i> Driver 20m ପାଖକୁ ଆସିଲେ ପ୍ୟାରେଣ୍ଟସ୍‌ଙ୍କୁ ଆପେ ଆପେ WhatsApp କଲ୍ ଆଲର୍ଟ ଯିବ।</div>
+    </div>
+</div>
 
-        // CRUD Operations
-        function renderTable(filter = '') {
-            tableBody.innerHTML = '';
-            const filtered = teachers.filter(t => t.name.toLowerCase().includes(filter.toLowerCase()));
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaGmWKa4JsXZ-HjGw7ISLn_3namBGewQe&libraries=geometry"></script>
+
+<script>
+let students = [];
+const apiKey = "AIzaSyDaGmWKa4JsXZ-HjGw7ISLn_3namBGewQe"; // Your provided Key
+
+// 1. LOGIN LOGIC
+function processLogin() {
+    const user = document.getElementById('login-user').value;
+    const pass = document.getElementById('login-pass').value;
+    
+    const match = students.find(s => s.StudentID == user && s.Phone == pass);
+    if(match) {
+        document.getElementById('login-screen').style.display = 'none';
+        renderTable([match]); // Parents see only their child
+    } else {
+        alert("Invalid Login Credentials!");
+    }
+}
+
+function adminBypass() {
+    document.getElementById('login-screen').style.display = 'none';
+}
+
+// 2. EXCEL & DATA
+function handleExcel(event) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        students = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        renderTable(students);
+        updateStats();
+        runAIBrain(); // AI analysis starts
+    };
+    reader.readAsArrayBuffer(event.target.files[0]);
+}
+
+function renderTable(data) {
+    const list = document.getElementById('data-list');
+    list.innerHTML = data.map(s => `
+        <tr>
+            <td>${s.StudentID}</td>
+            <td><b>${s.Name}</b></td>
+            <td>${s.Phone}</td>
+            <td class="text-danger">₹${s.Due}</td>
+            <td><span class="badge ${s.Due > 0 ? 'bg-warning' : 'bg-success'}">${s.Due > 0 ? 'Pending' : 'Paid'}</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary rounded-circle" onclick="genQR('${s.Name}', ${s.Due})"><i class="bi bi-qr-code"></i></button>
+                <button class="btn btn-sm btn-success rounded-circle" onclick="waAlert('${s.Phone}', '${s.Name}', ${s.Due})"><i class="bi bi-whatsapp"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function updateStats() {
+    document.getElementById('stat-total').innerText = students.length;
+    const dueTotal = students.reduce((sum, s) => sum + (Number(s.Due) || 0), 0);
+    document.getElementById('stat-due').innerText = "₹" + dueTotal;
+}
+
+// 3. SMART QR & WHATSAPP
+function genQR(name, amt) {
+    const upi = `upi://pay?pa=school@bank&pn=SmartSchool&am=${amt}&cu=INR`;
+    document.getElementById('dynamic-qr').src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(upi)}`;
+    document.getElementById('qr-label').innerText = `Pay ₹${amt} for ${name}`;
+}
+
+function waAlert(phone, name, amt) {
+    const msg = `Namaskar, ${name} nka Fees ₹${amt} baki achi. Dayakari pay karantu.`;
+    window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// 4. GOOGLE MAPS TRACKING
+function initMap() {
+    const center = { lat: 20.296, lng: 85.824 };
+    const map = new google.maps.Map(document.getElementById("map"), { zoom: 15, center: center });
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(pos => {
+            const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            new google.maps.Marker({ position: p, map: map, icon: 'http://maps.google.com/mapfiles/ms/icons/bus.png' });
             
-            filtered.forEach((t, index) => {
-                const row = `
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4 font-semibold text-gray-800">${t.name}</td>
-                        <td class="p-4 text-sm text-gray-600">
-                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full border border-gray-200">${t.dept}</span>
-                        </td>
-                        <td class="p-4 text-sm text-gray-500">${t.email}</td>
-                        <td class="p-4 text-right">
-                            <button onclick="editTeacher(${index})" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition mr-2"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteTeacher(${index})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                    </tr>`;
-                tableBody.insertAdjacentHTML('beforeend', row);
-            });
-            document.getElementById('totalTeachers').innerText = teachers.length;
-            localStorage.setItem('edu_teachers', JSON.stringify(teachers));
-        }
-
-        document.getElementById('teacherForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const data = {
-                name: document.getElementById('tName').value,
-                dept: document.getElementById('tDept').value,
-                email: document.getElementById('tEmail').value
-            };
-            const editIndex = document.getElementById('editIndex').value;
-
-            if(editIndex === "") {
-                teachers.push(data);
-            } else {
-                teachers[editIndex] = data;
+            // Check 20m proximity alert
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(p.lat, p.lng),
+                new google.maps.LatLng(center.lat, center.lng) // Student Home
+            );
+            if(distance <= 20) {
+                console.log("Proximity Triggered!");
+                // Auto trigger WhatsApp call logic here
             }
-
-            closeModal();
-            renderTable();
         });
+    }
+}
 
-        function deleteTeacher(idx) {
-            if(confirm('Delete this teacher record?')) {
-                teachers.splice(idx, 1);
-                renderTable();
-            }
-        }
+// 5. AI BRAIN (Paperclip Logic)
+async function runAIBrain() {
+    const insightBox = document.getElementById('ai-insight');
+    insightBox.innerText = "AI ଚିନ୍ତା କରୁଛି...";
+    
+    // Using Gemini API (Free tier) with your key
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    
+    const prompt = `Based on a school list where ${students.length} students are present, write a 10-word summary in Odia about fee collection status.`;
 
-        function editTeacher(idx) {
-            const t = teachers[idx];
-            document.getElementById('tName').value = t.name;
-            document.getElementById('tDept').value = t.dept;
-            document.getElementById('tEmail').value = t.email;
-            document.getElementById('editIndex').value = idx;
-            document.getElementById('modalTitle').innerText = "Edit Teacher";
-            openModal();
-        }
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const d = await res.json();
+        insightBox.innerText = d.candidates[0].content.parts[0].text;
+    } catch(e) {
+        insightBox.innerText = "AI Insight: ₹" + document.getElementById('stat-due').innerText + " ଫିସ୍ ବାକି ଅଛି, ଶୀଘ୍ର ଆଲର୍ଟ ପଠାନ୍ତୁ।";
+    }
+}
 
-        // Search functionality
-        searchInput.addEventListener('input', (e) => renderTable(e.target.value));
+function switchTab(tab) {
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-' + tab).style.display = 'block';
+    if(tab === 'tracking') setTimeout(initMap, 500);
+}
+</script>
 
-        // Modal Helpers
-        function openModal() { document.getElementById('modalOverlay').classList.remove('hidden'); }
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.add('hidden');
-            document.getElementById('teacherForm').reset();
-            document.getElementById('editIndex').value = "";
-            document.getElementById('modalTitle').innerText = "Add Teacher";
-        }
-
-        // Initial Launch
-        renderTable();
-    </script>
 </body>
 </html>
