@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMS | Teacher Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-link:hover { background-color: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-white hidden md:flex flex-col">
+        <div class="p-6 text-2xl font-bold border-b border-slate-700 flex items-center">
+            <i class="fas fa-university mr-3 text-blue-400"></i> EduSystem
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="#" class="flex items-center p-3 rounded-lg bg-blue-600 shadow-lg">
+                <i class="fas fa-th-large mr-3"></i> Dashboard
+            </a>
+            <a href="#" class="flex items-center p-3 rounded-lg sidebar-link transition">
+                <i class="fas fa-user-graduate mr-3"></i> Students
+            </a>
+            <a href="#" class="flex items-center p-3 rounded-lg sidebar-link transition">
+                <i class="fas fa-book mr-3"></i> Courses
+            </a>
+            <a href="#" class="flex items-center p-3 rounded-lg sidebar-link transition">
+                <i class="fas fa-cog mr-3"></i> Settings
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
+            <h2 class="text-xl font-semibold text-gray-700">Teacher Management</h2>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search teacher..." class="pl-10 pr-4 py-2 border rounded-full text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                </div>
+                <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition">
+                    <i class="fas fa-plus mr-2"></i> Add New
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <main class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-blue-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold uppercase">Total Teachers</p>
+                            <h3 id="totalTeachers" class="text-3xl font-bold mt-1 text-slate-800">0</h3>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-lg"><i class="fas fa-chalkboard-teacher text-blue-600 text-xl"></i></div>
+                    </div>
+                </div>
+                <!-- Static placeholders for UI design -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-green-500">
+                    <div class="flex justify-between items-center">
+                        <div><p class="text-gray-500 text-sm font-semibold uppercase">Departments</p><h3 class="text-3xl font-bold mt-1 text-slate-800">12</h3></div>
+                        <div class="bg-green-100 p-3 rounded-lg"><i class="fas fa-building text-green-600 text-xl"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teachers Table -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase">Teacher Name</th>
+                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase">Department</th>
+                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase">Email</th>
+                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherTable" class="divide-y divide-gray-100">
+                        <!-- Table rows will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="modalOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl transform transition-all">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800">Add Teacher</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
+            </div>
+            <form id="teacherForm" class="p-6 space-y-4">
+                <input type="hidden" id="editIndex">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="tName" required class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="Dr. John Smith">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                    <select id="tDept" class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Computer Science</option>
+                        <option>Mechanical Engineering</option>
+                        <option>Physics</option>
+                        <option>Applied Mathematics</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="tEmail" required class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="john@university.edu">
+                </div>
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 shadow-md">Confirm Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let teachers = JSON.parse(localStorage.getItem('edu_teachers')) || [];
+        const tableBody = document.getElementById('teacherTable');
+        const searchInput = document.getElementById('searchInput');
+
+        // CRUD Operations
+        function renderTable(filter = '') {
+            tableBody.innerHTML = '';
+            const filtered = teachers.filter(t => t.name.toLowerCase().includes(filter.toLowerCase()));
+            
+            filtered.forEach((t, index) => {
+                const row = `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4 font-semibold text-gray-800">${t.name}</td>
+                        <td class="p-4 text-sm text-gray-600">
+                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full border border-gray-200">${t.dept}</span>
+                        </td>
+                        <td class="p-4 text-sm text-gray-500">${t.email}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="editTeacher(${index})" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition mr-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteTeacher(${index})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+            document.getElementById('totalTeachers').innerText = teachers.length;
+            localStorage.setItem('edu_teachers', JSON.stringify(teachers));
+        }
+
+        document.getElementById('teacherForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('tName').value,
+                dept: document.getElementById('tDept').value,
+                email: document.getElementById('tEmail').value
+            };
+            const editIndex = document.getElementById('editIndex').value;
+
+            if(editIndex === "") {
+                teachers.push(data);
+            } else {
+                teachers[editIndex] = data;
+            }
+
+            closeModal();
+            renderTable();
+        });
+
+        function deleteTeacher(idx) {
+            if(confirm('Delete this teacher record?')) {
+                teachers.splice(idx, 1);
+                renderTable();
+            }
+        }
+
+        function editTeacher(idx) {
+            const t = teachers[idx];
+            document.getElementById('tName').value = t.name;
+            document.getElementById('tDept').value = t.dept;
+            document.getElementById('tEmail').value = t.email;
+            document.getElementById('editIndex').value = idx;
+            document.getElementById('modalTitle').innerText = "Edit Teacher";
+            openModal();
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => renderTable(e.target.value));
+
+        // Modal Helpers
+        function openModal() { document.getElementById('modalOverlay').classList.remove('hidden'); }
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+            document.getElementById('teacherForm').reset();
+            document.getElementById('editIndex').value = "";
+            document.getElementById('modalTitle').innerText = "Add Teacher";
+        }
+
+        // Initial Launch
+        renderTable();
+    </script>
+</body>
+</html>
