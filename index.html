@@ -3,154 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart School ERP Dashboard</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        // Main function to get coordinates
-        function getLocation() {
-            const locationDiv = $('#location');
-            
-            if (navigator.geolocation) {
-                locationDiv.html('<p class="text-blue-500 animate-pulse"><i class="fas fa-spinner fa-spin mr-2"></i> Detecting your coordinates...</p>');
-                
-                // Requesting high accuracy
-                navigator.geolocation.getCurrentPosition(showPosition, handleError, {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                });
-            } else {
-                alert("Geolocation is not supported by this browser.");
-            }
+    <title>SMART SCHOOL LAMS</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
         }
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to SMART SCHOOL LAMS</h1>
+    <div class="dashboard">
+        <div class="stat-card">
+            <h2>Total Buses</h2>
+            <p id="total-buses">5</p>
+        </div>
+        <div class="stat-card">
+            <h2>Active Routes</h2>
+            <p id="active-routes">3</p>
+        </div>
+        <div class="stat-card">
+            <h2>GPS Status</h2>
+            <p id="gps-status">Online</p>
+        </div>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
 
-        // Function to convert coordinates to Address using Nominatim (HTTPS Friendly)
-        function showPosition(position) {
-            let lat = position.coords.latitude;
-            let lon = position.coords.longitude;
-            const locationDiv = $('#location');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-            locationDiv.html('<p class="text-blue-600"><i class="fas fa-search-location mr-2"></i> Fetching address from server...</p>');
+        // Bus simulation feature
+        var busMarker = L.marker([51.505, -0.09]).addTo(map);
+        var buses = [
+            { id: 1, lat: 51.505, lng: -0.09 },
+            { id: 2, lat: 51.515, lng: -0.1 },
+        ];
 
-            // Nominatim API is free and works on GitHub HTTPS
-            let url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                headers: { 'Accept-Language': 'en' }, // Force English address
-                success: function(data) {
-                    if (data && data.display_name) {
-                        locationDiv.html(`
-                            <div class="bg-green-50 border-l-4 border-green-500 p-4">
-                                <p class="text-green-700 font-bold"><i class="fas fa-check-circle mr-2"></i> Location Found!</p>
-                                <p class="text-gray-700 mt-1"><strong>Address:</strong> ${data.display_name}</p>
-                                <p class="text-xs text-gray-500 mt-2">Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}</p>
-                            </div>
-                        `);
-                    } else {
-                        locationDiv.html(`<p class="text-yellow-600">Address not found. Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}</p>`);
-                    }
-                },
-                error: function() {
-                    locationDiv.html(`<p class="text-red-600 font-semibold">Error: API Request Failed. Please check your internet.</p>`);
-                }
+        function updateBusMarkers() {
+            buses.forEach(bus => {
+                busMarker.setLatLng([bus.lat, bus.lng]);
             });
         }
 
-        // Error Handling for Geolocation
-        function handleError(error) {
-            let msg = "";
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    msg = "Permission Denied. Please allow location access in your browser settings.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    msg = "Location information is unavailable.";
-                    break;
-                case error.TIMEOUT:
-                    msg = "The request to get user location timed out.";
-                    break;
-                default:
-                    msg = "An unknown error occurred.";
-            }
-            $('#location').html(`<p class="text-red-600 font-semibold"><i class="fas fa-exclamation-triangle mr-2"></i> ${msg}</p>`);
-        }
-
-        // Simple WhatsApp logic
-        function sendWhatsApp() {
-            let phone = $('#phone').val();
-            let message = "School Reminder: Please check the portal.";
-            if(phone.length >= 10) {
-                window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
-            } else {
-                alert("Please enter a valid 10-digit phone number.");
-            }
-        }
+        setInterval(updateBusMarkers, 5000);
     </script>
-</head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
-
-    <nav class="bg-blue-700 p-4 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-white text-xl font-bold flex items-center">
-                <i class="fas fa-school mr-2"></i> Smart School ERP
-            </a>
-            <div class="hidden md:flex space-x-6">
-                <a href="#" class="text-white hover:text-blue-200 transition">Home</a>
-                <a href="#" class="text-white hover:text-blue-200 transition">Staff</a>
-                <a href="#" class="text-white hover:text-blue-200 transition">Geofence</a>
-                <a href="#" class="text-white hover:text-blue-200 transition">Contact</a>
-            </div>
-        </div>
-    </nav>
-
-    <main class="container mx-auto mt-10 px-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Live Tracking</h2>
-                <p class="text-gray-600 mb-6">Click the button below to fetch the current staff member's location address.</p>
-                
-                <button onclick="getLocation()" class="w-full bg-blue-600 hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg shadow transition transform hover:scale-105 active:scale-95">
-                    <i class="fas fa-street-view mr-2"></i> Track Staff Location
-                </button>
-                
-                <div id="location" class="mt-6 min-h-24 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg p-4 text-gray-400">
-                    Location details will appear here...
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">WhatsApp Reminders</h2>
-                <p class="text-gray-600 mb-6">Send quick attendance or fee reminders via WhatsApp.</p>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Phone Number (10 Digits)</label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">+91</span>
-                            <input type="text" id="phone" maxlength="10" placeholder="9876543210" class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    
-                    <button onclick="sendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow transition transform hover:scale-105">
-                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Send Reminder
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <footer class="mt-20 py-6 text-center text-gray-500 border-t border-gray-200">
-        &copy; 2026 Smart School ERP. All Rights Reserved.
-    </footer>
-
 </body>
 </html>
